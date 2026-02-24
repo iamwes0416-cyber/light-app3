@@ -68,6 +68,14 @@
             const [animatingStars, setAnimatingStars] = useState([]);
             const [selectedMemory, setSelectedMemory] = useState(null);
 
+            // 👇 新增這個刪除微光的函數
+            const handleDeleteMemory = (id) => {
+                // 將不想保留的記憶從歷史紀錄中過濾掉
+                setHistory(prevHistory => prevHistory.filter(item => item.id !== id));
+                // 關閉卡片
+                setSelectedMemory(null);
+            };
+
             const handleSubmit = () => {
                 setStep('animating');
                 setIsNightMode(true);
@@ -182,9 +190,18 @@
                                             <div key={i}>{text}</div>
                                         ))}
                                     </div>
-                                    <button onClick={() => setSelectedMemory(null)} className="mt-6 px-5 py-2 border border-[#8C9C8C] text-[#8C9C8C] rounded-full text-[14px]">
-                                        關閉
-                                    </button>
+                                    
+                                    {/* 👇 修改這裡：把原本單一個關閉按鈕，變成「關閉」與「刪除」並排 */}
+                                    <div className="flex justify-center gap-4 mt-6">
+                                        <button onClick={() => setSelectedMemory(null)} className="px-5 py-2 border border-[#8C9C8C] text-[#8C9C8C] rounded-full text-[14px]">
+                                            關閉
+                                        </button>
+                                        <button onClick={() => handleDeleteMemory(selectedMemory.id)} className="px-5 py-2 border border-red-400/40 text-red-400/80 rounded-full text-[14px] active:bg-red-400/20 transition-colors">
+                                            刪除
+                                        </button>
+                                    </div>
+                                    {/* 👆 修改結束 👆 */}
+
                                 </div>
                             )}
                         </div>
