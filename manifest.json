@@ -1,0 +1,16 @@
+{
+  "name": "微光日常",
+  "short_name": "微光",
+  "description": "收集你今天度過的一絲微光。",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#FDFBF7",
+  "theme_color": "#1c2128",
+  "icons": [
+    {
+      "src": "icon.png",
+      "sizes": "512x512",
+      "type": "image/png"
+    }
+  ]
+}

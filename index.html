@@ -1,0 +1,187 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>微光日常</title>
+
+    <!-- PWA 身分證標籤 -->
+    <link rel="manifest" href="manifest.json">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="apple-mobile-web-app-title" content="微光日常">
+    <link rel="apple-touch-icon" href="icon.png">
+
+    <!-- 1. 引入 Tailwind CSS (負責排版與顏色) -->
+    <script src="https://cdn.tailwindcss.com"></script>
+
+    <!-- 2. 引入 React 核心函式庫 -->
+    <script src="https://unpkg.com/react@18/umd/react.production.min.js" crossorigin></script>
+    <script src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js" crossorigin></script>
+
+    <!-- 3. 引入 Babel (讓瀏覽器能直接看懂 React 語法) -->
+    <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+
+    <!-- 動畫與全域樣式設定 -->
+    <style>
+        @keyframes floatUp {
+            0% { transform: translateY(0) scale(1); opacity: 0; }
+            20% { opacity: 1; }
+            100% { transform: translateY(-250px) scale(0.5); opacity: 0; }
+        }
+        @keyframes pulseStar {
+            0% { transform: scale(0.8); opacity: 0.6; }
+            100% { transform: scale(1.2); opacity: 1; box-shadow: 0 0 15px 5px rgba(255, 253, 231, 0.8); }
+        }
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        /* 隱藏捲軸但保持可滑動，增添 App 沉浸感 */
+        ::-webkit-scrollbar {
+            display: none;
+        }
+        body {
+            margin: 0;
+            padding: 0;
+            overflow-x: hidden;
+            background-color: #FDFBF7; /* 預設背景防閃爍 */
+        }
+    </style>
+</head>
+<body>
+    <!-- React 應用程式會被渲染在這個 div 裡面 -->
+    <div id="root"></div>
+
+    <!-- 這裡就是你的 React 程式碼被包裝在 script 標籤裡 -->
+    <script type="text/babel">
+        const { useState, useEffect } = React;
+
+        function App() {
+            const [step, setStep] = useState('input');
+            const [isNightMode, setIsNightMode] = useState(false);
+            const [inputs, setInputs] = useState({ t1: '', t2: '', t3: '' });
+            const [history, setHistory] = useState([]);
+            const [animatingStars, setAnimatingStars] = useState([]);
+            const [selectedMemory, setSelectedMemory] = useState(null);
+
+            const handleSubmit = () => {
+                setStep('animating');
+                setIsNightMode(true);
+
+                const newStars = [
+                    { id: 1, left: 30, delay: Math.random() * 0.5 },
+                    { id: 2, left: 50, delay: Math.random() * 0.5 },
+                    { id: 3, left: 70, delay: Math.random() * 0.5 },
+                ];
+                setAnimatingStars(newStars);
+
+                setTimeout(() => {
+                    const newEntry = {
+                        id: Date.now(),
+                        date: "剛剛",
+                        entries: [
+                            inputs.t1 || '留白的一天',
+                            inputs.t2 || '安靜地度過',
+                            inputs.t3 || '感謝自己還在呼吸'
+                        ],
+                        x: 10 + Math.random() * 80,
+                        y: 10 + Math.random() * 80,
+                        pulseDuration: 1.5 + Math.random() * 2.5
+                    };
+                    
+                    setHistory(prev => [...prev, newEntry]);
+                    setStep('success');
+                    setAnimatingStars([]);
+                    setInputs({ t1: '', t2: '', t3: '' });
+                }, 2500);
+            };
+
+            return (
+                <div className={`min-h-screen w-full transition-colors duration-[2000ms] ease-in-out font-sans overflow-x-hidden ${isNightMode ? 'bg-[#1c2128] text-[#E0E0E0]' : 'bg-[#FDFBF7] text-[#5A5A5A]'}`}>
+                    <div className="max-w-md mx-auto px-5 pt-10 pb-16 relative min-h-screen flex flex-col">
+                        
+                        {/* 畫面一：輸入區 */}
+                        <div className={`transition-opacity duration-1000 ${step === 'input' ? 'opacity-100' : 'opacity-0 pointer-events-none absolute'}`}>
+                            <div className="text-[18px] mb-8 leading-relaxed">
+                                歡迎。<br/>
+                                <img src="https://fonts.gstatic.com/s/e/notoemoji/latest/1f4a1/512.gif" alt="微光" className="w-6 h-6 my-1 inline-block" /><br/>
+                                不需要完美的計畫，<br/>
+                                我們只收集你今天度過的一絲微光。
+                            </div>
+
+                            <div className="space-y-6">
+                                <div>
+                                    <label className="block text-[15px] font-medium mb-2 opacity-80">今天，有什麼微小的事物讓你感覺還不錯？</label>
+                                    <textarea rows="2" value={inputs.t1} onChange={(e) => setInputs({...inputs, t1: e.target.value})} className="w-full bg-[#F4F1EA] text-[#4A4A4A] rounded-2xl p-4 text-[16px] resize-none outline-none focus:bg-[#EBE6DC] transition-colors" placeholder="輕輕寫下一句話..."></textarea>
+                                </div>
+                                <div>
+                                    <label className="block text-[15px] font-medium mb-2 opacity-80">今天，你為自己做了一件什麼小事？</label>
+                                    <textarea rows="2" value={inputs.t2} onChange={(e) => setInputs({...inputs, t2: e.target.value})} className="w-full bg-[#F4F1EA] text-[#4A4A4A] rounded-2xl p-4 text-[16px] resize-none outline-none focus:bg-[#EBE6DC] transition-colors" placeholder="輕輕寫下一句話..."></textarea>
+                                </div>
+                                <div>
+                                    <label className="block text-[15px] font-medium mb-2 opacity-80">今天，就算有不如意，你想感謝自己什麼？</label>
+                                    <textarea rows="2" value={inputs.t3} onChange={(e) => setInputs({...inputs, t3: e.target.value})} className="w-full bg-[#F4F1EA] text-[#4A4A4A] rounded-2xl p-4 text-[16px] resize-none outline-none focus:bg-[#EBE6DC] transition-colors" placeholder="輕輕寫下一句話..."></textarea>
+                                </div>
+                            </div>
+
+                            <button onClick={handleSubmit} className="w-full bg-[#8C9C8C] text-white py-4 rounded-full text-[16px] tracking-wider mt-8 active:scale-95 transition-transform">
+                                化為微光
+                            </button>
+                        </div>
+
+                        {/* 動畫：升起的星光 */}
+                        {animatingStars.map(star => (
+                            <div key={star.id} className="fixed w-2 h-2 bg-[#FFFDE7] rounded-full z-50 pointer-events-none" style={{left: star.left + '%', top: '70vh', boxShadow: '0 0 15px 5px rgba(255, 253, 231, 0.6)', animation: 'floatUp 3s ease-in forwards', animationDelay: star.delay + 's'}} />
+                        ))}
+
+                        {/* 畫面二：晚安訊息 */}
+                        <div className={`fixed inset-0 flex flex-col items-center justify-center p-5 transition-opacity duration-1000 z-40 ${step === 'success' ? 'opacity-100' : 'opacity-0 pointer-events-none'}`}>
+                            <div className="text-[18px] leading-loose text-center text-[#D3D8D3]">
+                                這三個微小的瞬間，<br/>
+                                已經化作光芒，為你的明天鋪好了路。<br/><br/>
+                                辛苦了，晚安。
+                            </div>
+                            <button onClick={() => setStep('history')} className="mt-10 px-6 py-3 border border-[#8C9C8C] text-[#8C9C8C] rounded-full text-[15px] active:bg-[#8C9C8C] active:text-white transition-colors">
+                                回顧我的星空
+                            </button>
+                        </div>
+
+                        {/* 畫面三：星空歷史回顧 */}
+                        <div className={`fixed inset-0 pt-16 px-5 transition-opacity duration-1000 z-30 ${step === 'history' ? 'opacity-100' : 'opacity-0 pointer-events-none'}`}>
+                            <div className="text-center text-[16px] text-[#A0AAB5] tracking-wide">
+                                你累積了 {history.length} 天的微光
+                            </div>
+                            
+                            <div className="relative h-[60vh] mt-8 w-full max-w-md mx-auto">
+                                {history.map(item => (
+                                    <div key={item.id} onClick={() => setSelectedMemory(item)} className="absolute w-3 h-3 bg-[#FFFDE7] rounded-full cursor-pointer z-10" style={{left: item.x + '%', top: item.y + '%', animation: 'pulseStar ' + item.pulseDuration + 's infinite alternate', boxShadow: '0 0 10px 3px rgba(255, 253, 231, 0.4)'}} />
+                                ))}
+                            </div>
+
+                            {/* 歷史卡片 Modal */}
+                            {selectedMemory && (
+                                <div className="absolute top-[20%] left-5 right-5 bg-white/10 backdrop-blur-md border border-white/20 rounded-2xl p-6 text-center shadow-lg z-50" style={{ animation: 'fadeIn 0.4s forwards' }}>
+                                    <div className="text-[12px] text-[#A0AAB5] mb-4">{selectedMemory.date}</div>
+                                    <div className="space-y-3 text-[15px] leading-relaxed text-[#E0E0E0]">
+                                        {selectedMemory.entries.map((text, i) => (
+                                            <div key={i}>{text}</div>
+                                        ))}
+                                    </div>
+                                    <button onClick={() => setSelectedMemory(null)} className="mt-6 px-5 py-2 border border-[#8C9C8C] text-[#8C9C8C] rounded-full text-[14px]">
+                                        關閉
+                                    </button>
+                                </div>
+                            )}
+                        </div>
+
+                    </div>
+                </div>
+            );
+        }
+
+        const root = ReactDOM.createRoot(document.getElementById('root'));
+        root.render(<App />);
+    </script>
+</body>
+</html>
