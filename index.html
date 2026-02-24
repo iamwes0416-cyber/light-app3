@@ -64,9 +64,22 @@
             const [step, setStep] = useState('input');
             const [isNightMode, setIsNightMode] = useState(false);
             const [inputs, setInputs] = useState({ t1: '', t2: '', t3: '' });
-            const [history, setHistory] = useState([]);
+            
+            // 👇 修改 1：初始化時，先去手機記憶體找有沒有存過的星星
+            const [history, setHistory] = useState(() => {
+                const savedHistory = localStorage.getItem('glimmer_history');
+                return savedHistory ? JSON.parse(savedHistory) : [];
+            });
+            // 👆 修改 1 結束 👆
+
             const [animatingStars, setAnimatingStars] = useState([]);
             const [selectedMemory, setSelectedMemory] = useState(null);
+
+            // 👇 修改 2：新增自動存檔機制，只要星星數量有變，就偷偷存進手機裡
+            useEffect(() => {
+                localStorage.setItem('glimmer_history', JSON.stringify(history));
+            }, [history]);
+            // 👆 修改 2 結束 👆
 
             // 👇 新增這個刪除微光的函數
             const handleDeleteMemory = (id) => {
@@ -88,9 +101,13 @@
                 setAnimatingStars(newStars);
 
                 setTimeout(() => {
+                    // 👇 修改 3：獲取當下的真實日期時間，取代原本的「剛剛」
+                    const now = new Date();
+                    const dateString = `${now.getFullYear()}/${now.getMonth() + 1}/${now.getDate()} ${now.getHours().toString().padStart(2, '0')}:${now.getMinutes().toString().padStart(2, '0')}`;
+                    
                     const newEntry = {
                         id: Date.now(),
-                        date: "剛剛",
+                        date: dateString, // <--- 使用真實日期
                         entries: [
                             inputs.t1 || '留白的一天',
                             inputs.t2 || '安靜地度過',
