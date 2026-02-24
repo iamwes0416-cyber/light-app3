@@ -162,6 +162,17 @@
                                 ))}
                             </div>
 
+                            {/* 👇 新增的返回首頁按鈕 👇 */}
+                            <div className="text-center mt-6">
+                                <button 
+                                    onClick={() => { setStep('input'); setIsNightMode(false); }} 
+                                    className="px-6 py-3 border border-[#8C9C8C] text-[#8C9C8C] rounded-full text-[15px] active:bg-[#8C9C8C] active:text-white transition-colors"
+                                >
+                                    返回首頁
+                                </button>
+                            </div>
+                            {/* 👆 新增的返回首頁按鈕 👆 */}
+
                             {/* 歷史卡片 Modal */}
                             {selectedMemory && (
                                 <div className="absolute top-[20%] left-5 right-5 bg-white/10 backdrop-blur-md border border-white/20 rounded-2xl p-6 text-center shadow-lg z-50" style={{ animation: 'fadeIn 0.4s forwards' }}>
